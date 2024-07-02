@@ -1,0 +1,6 @@
+This is a project of philosophy, so why not think about how should we speed up
+how we process things, doing calculations in parallel, but there is a catch, you
+cannot deal with the same thing in parallel, you must use mutexes and define
+what can you do, and what you cannot do, of a list of todos...
+
+- I still don't understand this project.
