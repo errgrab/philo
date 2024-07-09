@@ -31,4 +31,17 @@ enum e_input
 	IN_LEN
 };
 
+typedef struct s_philo	t_philo;
+struct s_philo
+{
+	pthread_t		thread;
+	pthread_mutex_t	write;
+	pthread_mutex_t	fork;
+	size_t			time_last_meal;
+	int				meals_eaten;
+	int				status; // -1: dead, 0: thinking, 1: eating, 2: sleeping
+	int				id;
+	t_philo	*next;
+};
+
 #endif

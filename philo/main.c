@@ -6,23 +6,43 @@
 /*   By: ecarvalh <ecarvalh@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/21 03:01:10 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/07/02 23:20:40 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/07/09 01:04:06 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-/* DEBUG */
-void	debug_show_input(int input[IN_LEN]);
+/* DEBUG.c
+debug_show_input(int input[IN_LEN]);
+*/
 
-/* util.c */
-int		_atoi(char *num);
+/* util.c
+_atoi(char *num);
+get_time(void);
+*/
 
-/* main.c */
-int		usage(char *name);
-void	get_input(int ac, char **av, int input[IN_LEN]);
-void	init(int input[IN_LEN]);
-int		main(int ac, char **av);
+/* main.c
+usage(char *name);
+get_input(int ac, char **av, int input[IN_LEN]);
+init(int input[IN_LEN]);
+de_init(void);
+main(int ac, char **av);
+*/
+
+int	_atoi(char *num)
+{
+	unsigned int	res;
+	int				sig;
+
+	res = 0;
+	sig = 1;
+	while (*num == '-' || *num == '+')
+		if (*num++ == '-')
+			sig = -sig;
+	while (*num >= '0' && *num <= '9')
+		res = (res * 10) + (*num++ - '0');
+	return (res * sig);
+}
 
 int	usage(char *name)
 {
@@ -57,41 +77,76 @@ void	get_input(int ac, char **av, int input[IN_LEN])
 		input[i] = -1;
 }
 
-int	_atoi(char *num)
+size_t	get_time(void)
 {
-	unsigned int	res;
-	int				sig;
+	struct timeval	time;
 
-	res = 0;
-	sig = 1;
-	while (*num == '-' || *num == '+')
-		if (*num++ == '-')
-			sig = -sig;
-	while (*num >= '0' && *num <= '9')
-		res = (res * 10) + (*num++ - '0');
-	return (res * sig);
+	if (-1 == gettimeofday(&time, NULL))
+		write(2, "Error: get_time!\n", 17);
+	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
-void	init(int input[IN_LEN])
+void	*philo(void *arg)
 {
-	pthread_t	philo;
-	int			id;
+	t_philo	*philo;
 
-
-	(void)philo;
-	(void)id;
-	(void)input;
+	philo = (t_philo *)arg;
+	while (1)
+	{
+		pthread_mutex_lock(&philo->fork);
+		pthread_mutex_lock(&philo->next->fork);
+		pthread_mutex_unlock(&philo->fork);
+		pthread_mutex_unlock(&philo->next->fork);
+	}
+	return (NULL);
 }
 
-// void	de_init(void);
+t_philo *init(int input[IN_LEN])
+{
+	int			i;
+	t_philo		*res;
+
+	i = input[IN_NUM_PHILO];
+	res = malloc(sizeof(t_philo) * i);
+	memset(res, 0, input[IN_NUM_PHILO] * sizeof(t_philo));
+	while (i--)
+	{
+		res[i].thread = 0;
+		res[i].fork = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
+		res[i].write = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
+		res[i].time_last_meal = 0;
+		res[i].meals_eaten = 0;
+		res[i].status = 0;
+		res[i].id = i;
+		res[i].next = &res[(i + 1) % input[IN_NUM_PHILO] ];
+	}
+	return (res);
+}
+
+void	*de_init(int input[IN_LEN], t_philo *philos)
+{
+	int	i;
+
+	i = input[IN_NUM_PHILO];
+	while (i--)
+	{
+		pthread_mutex_destroy(&philos[i].fork);
+		pthread_mutex_destroy(&philos[i].write);
+	}
+	free(philos);
+	return (NULL);
+}
 
 int	main(int ac, char **av)
 {
-	int	input[IN_LEN];
+	int		input[IN_LEN];
+	t_philo	*philos;
 
 	if (ac < 5 || ac > 6)
 		return (usage(*av));
 	get_input(--ac, ++av, input);
+	philos = init(input);
 	debug_show_input(input);
+	philos = de_init(input, philos);
 	return (0);
 }
