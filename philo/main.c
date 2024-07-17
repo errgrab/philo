@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ecarvalh <ecarvalh@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/21 03:01:10 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/07/09 01:04:06 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/07/17 15:43:34 by anon             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ debug_show_input(int input[IN_LEN]);
 */
 
 /* util.c
-_atoi(char *num);
+int	_atoi(char *num);
 get_time(void);
 */
 
@@ -69,8 +69,8 @@ void	get_input(int ac, char **av, int input[IN_LEN])
 {
 	int	i;
 
-	i = -1;
 	memset(input, 0, IN_LEN);
+	i = -1;
 	while (++i < ac)
 		input[i] = _atoi(*av++);
 	if (i == IN_NUM_EAT)
@@ -95,6 +95,7 @@ void	*philo(void *arg)
 	{
 		pthread_mutex_lock(&philo->fork);
 		pthread_mutex_lock(&philo->next->fork);
+		printf("%zu %d TEST\n", get_time(), philo->id);
 		pthread_mutex_unlock(&philo->fork);
 		pthread_mutex_unlock(&philo->next->fork);
 	}
@@ -111,30 +112,10 @@ t_philo *init(int input[IN_LEN])
 	memset(res, 0, input[IN_NUM_PHILO] * sizeof(t_philo));
 	while (i--)
 	{
-		res[i].thread = 0;
-		res[i].fork = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
-		res[i].write = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
-		res[i].time_last_meal = 0;
-		res[i].meals_eaten = 0;
-		res[i].status = 0;
 		res[i].id = i;
 		res[i].next = &res[(i + 1) % input[IN_NUM_PHILO] ];
 	}
 	return (res);
-}
-
-void	*de_init(int input[IN_LEN], t_philo *philos)
-{
-	int	i;
-
-	i = input[IN_NUM_PHILO];
-	while (i--)
-	{
-		pthread_mutex_destroy(&philos[i].fork);
-		pthread_mutex_destroy(&philos[i].write);
-	}
-	free(philos);
-	return (NULL);
 }
 
 int	main(int ac, char **av)
@@ -146,7 +127,9 @@ int	main(int ac, char **av)
 		return (usage(*av));
 	get_input(--ac, ++av, input);
 	philos = init(input);
+	int i = -1;
+	while (++i < input[IN_NUM_PHILO])
+		pthread_create(&philos[i].thread, NULL, philo, &philos[i]);
 	debug_show_input(input);
-	philos = de_init(input, philos);
 	return (0);
 }
