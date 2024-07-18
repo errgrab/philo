@@ -6,7 +6,7 @@
 /*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/21 03:01:10 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/07/17 15:43:34 by anon             ###   ########.fr       */
+/*   Updated: 2024/07/18 19:39:40 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,14 +91,12 @@ void	*philo(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while (1)
-	{
-		pthread_mutex_lock(&philo->fork);
-		pthread_mutex_lock(&philo->next->fork);
-		printf("%zu %d TEST\n", get_time(), philo->id);
-		pthread_mutex_unlock(&philo->fork);
-		pthread_mutex_unlock(&philo->next->fork);
-	}
+	pthread_mutex_lock(&philo->fork);
+	pthread_mutex_lock(&philo->next->fork);
+	printf("%zu %d TEST\n", get_time(), philo->id);
+	pthread_mutex_unlock(&philo->fork);
+	pthread_mutex_unlock(&philo->next->fork);
+	usleep(4000000);
 	return (NULL);
 }
 
@@ -113,7 +111,8 @@ t_philo *init(int input[IN_LEN])
 	while (i--)
 	{
 		res[i].id = i;
-		res[i].next = &res[(i + 1) % input[IN_NUM_PHILO] ];
+		pthread_mutex_init(&res[i].fork, NULL);
+		res[i].next = &res[(i + 1) % input[IN_NUM_PHILO]];
 	}
 	return (res);
 }
@@ -130,6 +129,10 @@ int	main(int ac, char **av)
 	int i = -1;
 	while (++i < input[IN_NUM_PHILO])
 		pthread_create(&philos[i].thread, NULL, philo, &philos[i]);
+	i = -1;
+	while (++i < input[IN_NUM_PHILO])
+		pthread_join(philos[i].thread, NULL);
 	debug_show_input(input);
+	free(philos);
 	return (0);
 }

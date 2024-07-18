@@ -6,7 +6,7 @@
 /*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/20 20:59:58 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/07/16 21:48:24 by anon             ###   ########.fr       */
+/*   Updated: 2024/07/18 18:59:30 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ typedef struct s_philo	t_philo;
 struct s_philo
 {
 	pthread_t		thread;
-	pthread_mutex_t	write;
 	pthread_mutex_t	fork;
 	size_t			time_last_meal;
 	int				time_to_die;
@@ -44,7 +43,7 @@ struct s_philo
 	int				meals_eaten;
 	int				status; // -1: dead, 0: thinking, 1: eating, 2: sleeping
 	int				id;
-	t_philo	*next;
+	t_philo			*next;
 };
 
 #endif
