@@ -6,7 +6,7 @@
 /*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/20 20:59:58 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/07/18 18:59:30 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/07/19 00:13:45 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,18 @@
 # include <pthread.h>  /* pthread_{ create, detach, join,
 						 mutex_{ init, destroy, lock, unlock } } */
 
+# define INT_MAX 2147483647
+# define INT_MIN -2147483648
+
 enum e_input
 {
+	IN_ARGC,
 	IN_NUM_PHILO,
 	IN_TIME_DIE,
 	IN_TIME_EAT,
 	IN_TIME_SLEEP,
 	IN_NUM_EAT,
+	IN_ERROR,
 	IN_LEN
 };
 
