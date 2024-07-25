@@ -6,7 +6,7 @@
 /*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/21 03:01:10 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/07/19 00:33:38 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/07/25 13:43:02 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,19 +29,20 @@ de_init(void);
 main(int ac, char **av);
 */
 
-int	_atoi(char *num)
+int	_atoi(char *num, size_t *err)
 {
-	unsigned int	res;
-	int				sig;
+	int	res;
 
 	res = 0;
-	sig = 1;
-	while (*num == '-' || *num == '+')
-		if (*num++ == '-')
-			sig = -sig;
+	if (!(*num >= '0' && *num <= '9'))
+		(*err)++;
 	while (*num >= '0' && *num <= '9')
+	{
+		if ((res * 10) + (*num - '0') < res)
+			return ((*err)++, res);
 		res = (res * 10) + (*num++ - '0');
-	return (res * sig);
+	}
+	return (res);
 }
 
 int	usage(char *name)
@@ -52,7 +53,7 @@ int	usage(char *name)
 	return (1);
 }
 
-void	debug_show_input(int input[IN_LEN])
+void	debug_show_input(size_t input[IN_LEN])
 {
 	int		i;
 	char	**input_text;
@@ -60,38 +61,31 @@ void	debug_show_input(int input[IN_LEN])
 	i = -1;
 	input_text = (char *[]){
 		"IN_ARGC", "IN_NUM_PHILO", "IN_TIME_DIE", "IN_TIME_EAT",
-		"IN_TIME_SLEEP", "IN_NUM_EAT", "IN_ERROR", "IN_LEN"};
+		"IN_TIME_SLEEP", "IN_NUM_EAT", "IN_ERROR", "IN_TIME"};
 	while (++i < IN_LEN)
-		printf("input[%d](%s) = %d\n", i, input_text[i], input[i]);
+		printf("input[%d](%s) = %lu\n", i, input_text[i], input[i]);
 	printf("\n");
 }
 
-void	get_input(int ac, char **av, int input[IN_LEN])
+size_t	get_time(size_t start)
 {
-//	int	i;
+	struct timeval	t;
 
-	memset(input, 0, IN_LEN);
-	(void)ac;
-	(void)av;
-	/*
-	i = 0;
-	input[i] = ac - 1;
-	while (++i < ac)
-		input[i] = _atoi(*av++);
-	i = 0;
-	while (++i < ac)
-		if (input[i] < 0 || input[i] > INT_MAX)
-			input[IN_ERROR]++;
-			*/
+	if (-1 == gettimeofday(&t, NULL))
+		write(2, "Error: get_time!\n", 17);
+	return ((t.tv_sec * 1000 + t.tv_usec / 1000) - start);
 }
 
-size_t	get_time(void)
+void	get_input(int ac, char **av, size_t input[IN_LEN])
 {
-	struct timeval	time;
+	int	i;
 
-	if (-1 == gettimeofday(&time, NULL))
-		write(2, "Error: get_time!\n", 17);
-	return (time.tv_sec * 1000 + time.tv_usec / 1000);
+	memset(input, 0, IN_LEN * sizeof(int));
+	i = 0;
+	input[i] = ac;
+	while (++i <= ac)
+		input[i] = _atoi(*av++, &input[IN_ERROR]);
+	input[IN_TIME] = get_time(0);
 }
 
 void	*philo(void *arg)
@@ -99,16 +93,23 @@ void	*philo(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
+	printf("%ld\t%d is thinking\n", get_time(philo->input[IN_TIME]), philo->id);
 	pthread_mutex_lock(&philo->fork);
+	printf("%ld\t%d has taken a fork\n", get_time(philo->input[IN_TIME]),
+		philo->id);
 	pthread_mutex_lock(&philo->next->fork);
-	printf("%zu %d TEST\n", get_time(), philo->id);
+	printf("%ld\t%d has taken a fork\n", get_time(philo->input[IN_TIME]),
+		philo->id);
+	printf("%ld\t%d is eating\n", get_time(philo->input[IN_TIME]), philo->id);
+	usleep(philo->input[IN_TIME_EAT] * 1000);
 	pthread_mutex_unlock(&philo->fork);
 	pthread_mutex_unlock(&philo->next->fork);
-	usleep(1000000);
+	printf("%ld\t%d is sleeping\n", get_time(philo->input[IN_TIME]), philo->id);
+	usleep(philo->input[IN_TIME_SLEEP] * 1000);
 	return (NULL);
 }
 
-t_philo *init(int input[IN_LEN])
+t_philo *init(size_t input[IN_LEN])
 {
 	int			i;
 	t_philo		*res;
@@ -121,34 +122,28 @@ t_philo *init(int input[IN_LEN])
 		res[i].id = i + 1;
 		pthread_mutex_init(&res[i].fork, NULL);
 		res[i].next = &res[(i + 1) % input[IN_NUM_PHILO]];
+		res[i].input = input;
 	}
 	return (res);
 }
 
 int	main(int ac, char **av)
 {
-	int		input[IN_LEN];
+	size_t	input[IN_LEN];
 	t_philo	*philos;
 
 	if (ac < 5 || ac > 6)
 		return (usage(*av));
 	get_input(--ac, ++av, input);
-	debug_show_input(input);
 	if (input[IN_ERROR])
-	{
-		printf("input ERROR: %d\n", input[IN_ERROR]);
 		return (write(2, "Invalid input!\n", 15), 1);
-	}
 	philos = init(input);
-	/*
-	int i = -1;
+	size_t i = -1;
 	while (++i < input[IN_NUM_PHILO])
 		pthread_create(&philos[i].thread, NULL, philo, &philos[i]);
 	i = -1;
 	while (++i < input[IN_NUM_PHILO])
 		pthread_join(philos[i].thread, NULL);
-	*/
-	printf("philo %d, is id %d\n", 0, philos[0].id);
 //	debug_show_input(input);
 	free(philos);
 	return (0);

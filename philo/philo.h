@@ -6,7 +6,7 @@
 /*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/20 20:59:58 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/07/19 00:13:45 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/07/23 11:54:35 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ enum e_input
 	IN_TIME_SLEEP,
 	IN_NUM_EAT,
 	IN_ERROR,
+	IN_TIME,
 	IN_LEN
 };
 
@@ -42,9 +43,7 @@ struct s_philo
 	pthread_t		thread;
 	pthread_mutex_t	fork;
 	size_t			time_last_meal;
-	int				time_to_die;
-	int				time_to_eat;
-	int				time_to_sleep;
+	size_t			*input;
 	int				meals_eaten;
 	int				status; // -1: dead, 0: thinking, 1: eating, 2: sleeping
 	int				id;
