@@ -6,7 +6,7 @@
 #    By: ecarvalh <ecarvalh@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/26 11:33:41 by ecarvalh          #+#    #+#              #
-#    Updated: 2024/06/28 23:21:11 by ecarvalh         ###   ########.fr        #
+#    Updated: 2024/08/12 18:21:40 by ecarvalh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,5 +32,8 @@ re: fclean all
 $(ODIR)/%.o: %.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+leak: all
+	valgrind --leak-check=full --show-leak-kinds=all ./$(NAME) 5 100 100 300
 
 .PHONY: all clean fclean re
