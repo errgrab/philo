@@ -6,7 +6,7 @@
 /*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/20 20:59:58 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/12 18:04:09 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/14 18:39:47 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,30 +24,39 @@
 
 # define INT_MAX 2147483647
 
-enum e_input
-{
-	IN_ARGC,
-	IN_NUM_PHILO,
-	IN_TIME_DIE,
-	IN_TIME_EAT,
-	IN_TIME_SLEEP,
-	IN_NUM_EAT,
-	IN_ERROR,
-	IN_START_TIME,
-	IN_LEN
-};
-
+typedef struct s_state	t_state;
 typedef struct s_philo	t_philo;
+typedef pthread_mutex_t	t_mutex;
+typedef pthread_t		t_hread;
+
 struct s_philo
 {
-	pthread_t		thread;
-	pthread_mutex_t	fork;
-	size_t			time_last_meal;
-	size_t			*input;
-	int				meals_eaten;
-	int				status; /* -1: dead, 0: thinking, 1: eating, 2: sleeping */
-	int				id;
-	t_philo			*next;
+	t_hread	thread;
+	t_mutex	fork;
+	size_t	time_last_meal;
+	size_t	meals_eaten;
+	size_t	id;
+	size_t	status; /* 3: dead, 0: thinking, 1: eating, 2: sleeping */
+	t_philo	*next;
+	t_state	*state;
 };
+
+struct s_state
+{
+	size_t	argc;
+	size_t	num_philo;
+	size_t	time_die;
+	size_t	time_eat;
+	size_t	time_sleep;
+	size_t	eat_limit;
+	size_t	err;
+	size_t	start_time;
+	t_philo	*philos;
+};
+
+/* utils.c */
+size_t	_atoi(char *num, size_t *err);
+size_t	get_time(size_t start);
+void	get_input(int ac, char **av, t_state *state);
 
 #endif
