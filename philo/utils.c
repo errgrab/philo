@@ -6,7 +6,7 @@
 /*   By: ecarvalh <ecarvalh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 18:35:55 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/14 19:05:19 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/15 16:13:21 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ size_t	get_time(size_t start)
 	struct timeval	t;
 
 	if (gettimeofday(&t, NULL))
-		write(2, "Error: get_time!\n", 17);
+		return (write(2, "Error: get_time!\n", 17), 0);
 	return ((t.tv_sec * 1000 + t.tv_usec / 1000) - start);
 }
 
@@ -44,4 +44,5 @@ void	get_input(int ac, char **av, t_state *state)
 	state->time_sleep = _atoi(av[3], &state->err);
 	if (ac == 5)
 		state->eat_limit = _atoi(av[4], &state->err);
+	state->start_time = get_time(0);
 }
