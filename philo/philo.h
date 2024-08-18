@@ -6,7 +6,7 @@
 /*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/20 20:59:58 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/18 22:44:58 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/18 23:21:31 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ struct s_philo
 	size_t	time_sleep;
 
 	size_t	action; // 0: thinking, 1: eating, 2: sleeping, 3: dead
+	size_t	in_hand;
 	size_t	last_action;
 
 	t_philo	*next;
@@ -80,7 +81,7 @@ void	*philo_routine(void *ptr);
 size_t	philo_eat_routine(t_philo *philo);
 void	philo_next_action(t_philo *philo);
 
-void	print_log(char *str, t_philo *philo);
+//void	print_log(char *str, t_philo *philo);
 
 /* main.c */
 int		usage(char *name);

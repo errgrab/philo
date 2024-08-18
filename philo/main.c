@@ -16,11 +16,6 @@
 int	usage(char *name);
 int	main(int ac, char **av);
 
-void	print_log(char *str, t_philo *philo)
-{
-	printf("%zu\t%zu %s\n", get_time(), philo->id, str);
-}
-
 void	philo_next_action(t_philo *philo)
 {
 	if (philo->action < 3)
@@ -30,8 +25,12 @@ void	philo_next_action(t_philo *philo)
 size_t	philo_eat_routine(t_philo *philo)
 {
 	pthread_mutex_lock(&philo->fork);
+	pthread_mutex_lock(&philo->mutex);
+	philo->in_hand++;
+	pthread_mutex_unlock(&philo->mutex);
 	pthread_mutex_lock(&philo->next->fork);
 	pthread_mutex_lock(&philo->mutex);
+	philo->in_hand++;
 	philo->meals_eaten++;
 	philo->last_meal = get_time_now();
 	philo_next_action(philo);
@@ -40,8 +39,8 @@ size_t	philo_eat_routine(t_philo *philo)
 			pthread_mutex_unlock(&philo->next->fork), 1);
 	pthread_mutex_unlock(&philo->mutex);
 	usleep(philo->time_eat * 1000);
-	pthread_mutex_unlock(&philo->fork);
 	pthread_mutex_unlock(&philo->next->fork);
+	pthread_mutex_unlock(&philo->fork);
 	return (0);
 }
 
@@ -95,6 +94,32 @@ t_philo	*philo_init(t_state *state)
 	return (res);
 }
 
+void	print_log(t_philo *philo)
+{
+	static char	*str[] = {"is thinking", "is eating", "is sleeping", "is DEAD"};
+
+	printf("%zu\t%zu %s\n", get_time(), philo->id, str[philo->action]);
+	philo->last_action = philo->action;
+}
+
+void	watchphilos(t_state *state)
+{
+	t_philo	*philo;
+
+	philo = state->philos;
+	while (!state->err)
+	{
+		pthread_mutex_lock(&philo->mutex);
+		while (philo->in_hand > 0 && philo->in_hand--)
+			printf("%zu\t%zu %s\n", get_time(), philo->id, "has taken a fork");
+		if (philo->action != philo->last_action)
+			print_log(philo);
+		pthread_mutex_unlock(&philo->mutex);
+		philo = philo->next;
+//		check_alive(state, philo);
+	}
+}
+
 int	usage(char *name)
 {
 	printf("Usage: %s number_of_philosophers time_to_die time_to_eat "
@@ -112,7 +137,6 @@ int	main(int ac, char **av)
 	get_input(--ac, ++av, &state);
 	if (state.err)
 		return (write(2, "Err: Use values between 1 and INT_MAX!\n", 39), 1);
-//	debug_show_input(&state);
 	state.philos = philo_init(&state);
 	if (state.err)
 		return (write(2, "Err: Unable to allocate philosophers!\n", 37), 1);
@@ -120,6 +144,7 @@ int	main(int ac, char **av)
 	while (++i < state.num_philo)
 		pthread_create(&state.philos[i].thread, NULL, philo_routine,
 			&state.philos[i]);
+	watchphilos(&state);
 	i = (size_t)-1;
 	while (++i < state.num_philo)
 		pthread_join(state.philos[i].thread, NULL);
