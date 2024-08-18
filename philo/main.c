@@ -1,4 +1,5 @@
 /* ************************************************************************** */
+/* main.c */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
@@ -6,103 +7,63 @@
 /*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/21 03:01:10 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/16 18:15:29 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/18 22:43:04 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-
-/* philo.c
-void	*routine(void *ptr)
-t_philo	*philo_init(t_state *state)
-*/
-
-/* main.c */
 int	usage(char *name);
 int	main(int ac, char **av);
 
 void	print_log(char *str, t_philo *philo)
 {
-	printf("%zu\t%zu %s\n", get_time(philo->state->start_time), philo->id, str);
+	printf("%zu\t%zu %s\n", get_time(), philo->id, str);
 }
 
-void	get_fork(t_philo	*philo)
+void	philo_next_action(t_philo *philo)
 {
-	while (1) {
-		pthread_mutex_lock(&philo->mutex);
-		if (!philo->fork && !philo->dead)
-		{
-			pthread_mutex_unlock(&philo->mutex);
-			usleep(50);
-			continue ;
-		}
-		philo->fork--;
-		philo->fork_in_hand++;
-		pthread_mutex_unlock(&philo->mutex);
-		break ;
-	}
+	if (philo->action < 3)
+		philo->action = (philo->action + 1) % 3 ;
 }
 
-void	get_next_fork(t_philo *philo)
+size_t	philo_eat_routine(t_philo *philo)
 {
-	while (1) {
-		if (philo->dead)
-			break ;
-		pthread_mutex_lock(&philo->next->mutex);
-		if (!philo->next->fork)
-		{
-			pthread_mutex_unlock(&philo->mutex);
-			usleep(50);
-			continue ;
-		}
-		philo->next->fork--;
-		pthread_mutex_unlock(&philo->next->mutex);
-		pthread_mutex_lock(&philo->mutex);
-		philo->fork_in_hand++;
-		pthread_mutex_unlock(&philo->mutex);
-		break ;
-	}
-}
-
-void	eat_routine(t_philo *philo)
-{
-	get_fork(philo);
-	get_next_fork(philo);
+	pthread_mutex_lock(&philo->fork);
+	pthread_mutex_lock(&philo->next->fork);
 	pthread_mutex_lock(&philo->mutex);
-	philo->eating++;
-	philo->last_meal = get_time(0);
+	philo->meals_eaten++;
+	philo->last_meal = get_time_now();
+	philo_next_action(philo);
+	if (philo->action == 3)
+		return (pthread_mutex_unlock(&philo->fork),
+			pthread_mutex_unlock(&philo->next->fork), 1);
 	pthread_mutex_unlock(&philo->mutex);
 	usleep(philo->time_eat * 1000);
-	pthread_mutex_lock(&philo->mutex);
-	philo->fork++;
-	pthread_mutex_unlock(&philo->mutex);
-	pthread_mutex_lock(&philo->next->mutex);
-	philo->next->fork++;
-	pthread_mutex_unlock(&philo->next->mutex);
+	pthread_mutex_unlock(&philo->fork);
+	pthread_mutex_unlock(&philo->next->fork);
+	return (0);
 }
 
-void	*routine(void *ptr)
+void	*philo_routine(void *ptr)
 {
 	t_philo	*philo;
-	t_state	*state;
 
 	philo = (t_philo *)ptr;
-	state = philo->state;
 	while (1)
 	{
-		eat_routine(philo);
-		pthread_mutex_lock(&philo->mutex);
-		if (philo->dead)
+		if (philo_eat_routine(philo))
 			break ;
-		philo->meals_count++;
-		philo->sleeping++;
+		pthread_mutex_lock(&philo->mutex);
+		philo_next_action(philo);
+		if (philo->action == 3)
+			break ;
 		pthread_mutex_unlock(&philo->mutex);
 		usleep(philo->time_sleep * 1000);
 		pthread_mutex_lock(&philo->mutex);
-		if (philo->dead)
+		philo_next_action(philo);
+		if (philo->action == 3)
 			break ;
-		philo->thinking++;
 		pthread_mutex_unlock(&philo->mutex);
 	}
 	pthread_mutex_unlock(&philo->mutex);
@@ -112,18 +73,21 @@ void	*routine(void *ptr)
 t_philo	*philo_init(t_state *state)
 {
 	t_philo	*res;
+	size_t	now;
 
 	auto int i = state->num_philo;
 	res = malloc(sizeof(t_philo) * i);
 	if (!res)
 		return (state->err++, NULL);
 	memset(res, 0, sizeof(t_philo) * i);
+	now = get_time_now();
 	while (i--)
 	{
 		res[i].id = i + 1;
-		res[i].last_meal = get_time(0);
+		res[i].last_meal = now;
 		res[i].time_eat = state->time_eat;
 		res[i].time_sleep = state->time_sleep;
+		res[i].last_action = 42;
 		pthread_mutex_init(&res[i].fork, NULL);
 		res[i].next = &res[(i + 1) % state->num_philo];
 		res[i].state = state;
@@ -151,12 +115,12 @@ int	main(int ac, char **av)
 //	debug_show_input(&state);
 	state.philos = philo_init(&state);
 	if (state.err)
-		return (write(2, "Err: Unable to allocate philosophers\n", 37), 1);
-	auto size_t i = -1;
+		return (write(2, "Err: Unable to allocate philosophers!\n", 37), 1);
+	auto size_t i = (size_t)-1;
 	while (++i < state.num_philo)
-		pthread_create(&state.philos[i].thread, NULL, routine,
+		pthread_create(&state.philos[i].thread, NULL, philo_routine,
 			&state.philos[i]);
-	i = -1;
+	i = (size_t)-1;
 	while (++i < state.num_philo)
 		pthread_join(state.philos[i].thread, NULL);
 	free(state.philos);

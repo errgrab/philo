@@ -6,11 +6,16 @@
 /*   By: ecarvalh <ecarvalh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 18:35:55 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/15 16:13:21 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/18 21:45:25 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+size_t	_atoi(char *num, size_t *err);
+size_t	get_time_now(void);
+size_t	get_time(void);
+void	get_input(int ac, char **av, t_state *state);
 
 size_t	_atoi(char *num, size_t *err)
 {
@@ -26,13 +31,24 @@ size_t	_atoi(char *num, size_t *err)
 	return (res);
 }
 
-size_t	get_time(size_t start)
+size_t	get_time_now(void)
 {
 	struct timeval	t;
 
 	if (gettimeofday(&t, NULL))
 		return (write(2, "Error: get_time!\n", 17), 0);
-	return ((t.tv_sec * 1000 + t.tv_usec / 1000) - start);
+	return ((t.tv_sec * 1000 + t.tv_usec / 1000));
+}
+
+size_t	get_time(void)
+{
+	static size_t	start;
+	size_t			now;
+
+	now = get_time_now();
+	if (!start)
+		start = now;
+	return (now - start);
 }
 
 void	get_input(int ac, char **av, t_state *state)
@@ -44,5 +60,5 @@ void	get_input(int ac, char **av, t_state *state)
 	state->time_sleep = _atoi(av[3], &state->err);
 	if (ac == 5)
 		state->eat_limit = _atoi(av[4], &state->err);
-	state->start_time = get_time(0);
+	get_time();
 }
