@@ -6,7 +6,7 @@
 /*   By: ecarvalh <ecarvalh@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 17:18:43 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/19 17:33:35 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/19 19:00:48 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void	check_isalive(t_state *state, t_philo *philo)
 	pthread_mutex_lock(&philo->mutex);
 	if (get_time_now() - philo->last_meal > state->time_die)
 	{
-		printf("%zu\t%zu %s\n", get_time(), philo->id, "is DEAD");
+		printf("%zu\t%zu %s\n", get_time(), philo->id, "died");
 		philo->dead++;
 		state->err++;
 	}
