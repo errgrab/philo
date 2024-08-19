@@ -6,7 +6,7 @@
 /*   By: ecarvalh <ecarvalh@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/18 23:57:41 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/19 03:46:51 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/19 15:12:43 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,10 +127,16 @@ void	check_isalive(t_state *state, t_philo *philo)
 	if (state->argc == 5)
 	{
 		auto size_t i = state->num_philo;
+		pthread_mutex_lock(&state->philos[i - 1].mutex);
 		auto size_t min = state->philos[i - 1].meals_eaten;
+		pthread_mutex_unlock(&state->philos[i - 1].mutex);
 		while (i-- > 0)
+		{
+			pthread_mutex_lock(&state->philos[i].mutex);
 			if (min > state->philos[i].meals_eaten)
 				min = state->philos[i].meals_eaten;
+			pthread_mutex_unlock(&state->philos[i].mutex);
+		}
 		if (min >= state->eat_limit)
 			state->err++;
 	}
@@ -194,8 +200,8 @@ int	main(int ac, char **av)
 	state.philos = philo_init(&state);
 	if (state.err)
 		return (write(2, "Err: Unable to allocate philosophers!\n", 37), 1);
-	auto size_t i = state.num_philo;
-	while (i-- > 0)
+	auto size_t i = (size_t)-1;
+	while (++i < state.num_philo)
 		pthread_create(&state.philos[i].thread, NULL, philo_routine,
 			&state.philos[i]);
 	check_watchphilos(&state);
