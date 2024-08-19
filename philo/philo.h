@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: ecarvalh <ecarvalh@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/20 20:59:58 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/19 03:42:24 by ecarvalh         ###   ########.fr       */
+/*   Created: 2024/08/19 17:18:51 by ecarvalh          #+#    #+#             */
+/*   Updated: 2024/08/19 17:34:03 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,20 +69,18 @@ struct s_state
 	t_philo	*philos;
 };
 
-/* utils.c */
-size_t	_atoi(char *num, size_t *err);
+/* get.c */
 size_t	get_time_now(void);
 size_t	get_time(void);
 void	get_input(int ac, char **av, t_state *state);
 
-/* ??? */
+/* philo.c */
 t_philo	*philo_init(t_state *state);
 void	*philo_routine(void *ptr);
-size_t	philo_eat_routine(t_philo *philo);
-void	philo_get_fork(t_philo *philo, t_philo *philo_fork);
 
 /* main.c */
 int		usage(char *name);
 int		main(int ac, char **av);
+void	check_watchphilos(t_state *state);
 
 #endif

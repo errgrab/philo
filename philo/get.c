@@ -1,23 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   get.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ecarvalh <ecarvalh@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ecarvalh <ecarvalh@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/14 18:35:55 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/19 03:21:06 by ecarvalh         ###   ########.fr       */
+/*   Created: 2024/08/19 17:18:55 by ecarvalh          #+#    #+#             */
+/*   Updated: 2024/08/19 17:31:02 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-size_t	_atoi(char *num, size_t *err);
-size_t	get_time_now(void);
-size_t	get_time(void);
-void	get_input(int ac, char **av, t_state *state);
+static size_t	_atoi(char *num, size_t *err);
+size_t			get_time_now(void);
+size_t			get_time(void);
+void			get_input(int ac, char **av, t_state *state);
 
-size_t	_atoi(char *num, size_t *err)
+static size_t	_atoi(char *num, size_t *err)
 {
 	size_t	res;
 
