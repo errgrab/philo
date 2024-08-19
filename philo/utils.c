@@ -6,7 +6,7 @@
 /*   By: ecarvalh <ecarvalh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 18:35:55 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/18 21:45:25 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/19 03:21:06 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ size_t	_atoi(char *num, size_t *err)
 	res = 0;
 	while (*num && (*num >= '0' && *num <= '9'))
 		res = (res * 10) + (*num++ - '0');
-	if (res > INT_MAX)
+	if (res > INT_MAX || res == 0)
 		return ((*err)++);
 	return (res);
 }

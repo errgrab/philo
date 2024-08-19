@@ -6,7 +6,7 @@
 /*   By: ecarvalh <ecarvalh@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/18 23:24:33 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/18 23:24:34 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/19 01:05:40 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,4 +21,3 @@ void	debug_show_input(t_state *state)
 	printf("time_sleep = %zu\n", state->time_sleep);
 	printf("eat_limit = %zu\n", state->eat_limit);
 }
-

@@ -6,7 +6,7 @@
 /*   By: anon <anon@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/20 20:59:58 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/18 23:21:31 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/19 03:42:24 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ typedef pthread_t		t_hread;
 struct s_philo
 {
 	t_hread	thread;
-	t_mutex	fork;
 	t_mutex	mutex;
 
 	size_t	last_meal;
@@ -43,9 +42,13 @@ struct s_philo
 	size_t	time_eat;
 	size_t	time_sleep;
 
-	size_t	action; // 0: thinking, 1: eating, 2: sleeping, 3: dead
+	size_t	fork;
 	size_t	in_hand;
-	size_t	last_action;
+
+	size_t	thinking;
+	size_t	eating;
+	size_t	sleeping;
+	size_t	dead;
 
 	t_philo	*next;
 	t_state	*state;
@@ -72,16 +75,11 @@ size_t	get_time_now(void);
 size_t	get_time(void);
 void	get_input(int ac, char **av, t_state *state);
 
-/* DEBUG.c */
-void	debug_show_input(t_state *state);
-
 /* ??? */
 t_philo	*philo_init(t_state *state);
 void	*philo_routine(void *ptr);
 size_t	philo_eat_routine(t_philo *philo);
-void	philo_next_action(t_philo *philo);
-
-//void	print_log(char *str, t_philo *philo);
+void	philo_get_fork(t_philo *philo, t_philo *philo_fork);
 
 /* main.c */
 int		usage(char *name);
