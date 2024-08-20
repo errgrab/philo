@@ -6,7 +6,7 @@
 /*   By: ecarvalh <ecarvalh@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 17:19:07 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/19 17:27:00 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/20 20:22:29 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ void	*philo_routine(void *ptr)
 		pthread_mutex_lock(&philo->mutex);
 		if (philo->dead)
 			break ;
+		philo->meals_eaten++;
 		philo->sleeping++;
 		pthread_mutex_unlock(&philo->mutex);
 		usleep(philo->time_sleep * 1000);
@@ -75,12 +76,10 @@ static size_t	philo_eat_routine(t_philo *philo)
 	if (philo->dead)
 		return (1);
 	philo->eating++;
-	philo->meals_eaten++;
 	philo->last_meal = get_time_now();
 	pthread_mutex_unlock(&philo->mutex);
 	usleep(philo->time_eat * 1000);
 	pthread_mutex_lock(&philo->mutex);
-	philo->meals_eaten++;
 	philo->fork++;
 	pthread_mutex_unlock(&philo->mutex);
 	pthread_mutex_lock(&philo->next->mutex);

@@ -6,7 +6,7 @@
 /*   By: ecarvalh <ecarvalh@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/19 17:18:43 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/19 19:00:48 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/20 18:57:03 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,22 +79,21 @@ void	check_isalive(t_state *state, t_philo *philo)
 		state->err++;
 	}
 	pthread_mutex_unlock(&philo->mutex);
-	if (state->argc == 5)
+	if (state->argc != 5)
+		return ;
+	auto size_t i = (size_t)-1;
+	pthread_mutex_lock(&state->philos[0].mutex);
+	auto size_t min = state->philos[0].meals_eaten;
+	pthread_mutex_unlock(&state->philos[0].mutex);
+	while (++i < state->num_philo)
 	{
-		auto size_t i = state->num_philo;
-		pthread_mutex_lock(&state->philos[i - 1].mutex);
-		auto size_t min = state->philos[i - 1].meals_eaten;
-		pthread_mutex_unlock(&state->philos[i - 1].mutex);
-		while (i-- > 0)
-		{
-			pthread_mutex_lock(&state->philos[i].mutex);
-			if (min > state->philos[i].meals_eaten)
-				min = state->philos[i].meals_eaten;
-			pthread_mutex_unlock(&state->philos[i].mutex);
-		}
-		if (min >= state->eat_limit)
-			state->err++;
+		pthread_mutex_lock(&state->philos[i].mutex);
+		if (min > state->philos[i].meals_eaten)
+			min = state->philos[i].meals_eaten;
+		pthread_mutex_unlock(&state->philos[i].mutex);
 	}
+	if (min >= state->eat_limit)
+		state->err++;
 }
 
 void	check_end(t_state *state)
