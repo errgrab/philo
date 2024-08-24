@@ -6,7 +6,7 @@
 /*   By: ecarvalh <ecarvalh@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 03:08:13 by ecarvalh          #+#    #+#             */
-/*   Updated: 2024/08/24 04:19:51 by ecarvalh         ###   ########.fr       */
+/*   Updated: 2024/08/24 16:03:37 by ecarvalh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static void	_log(t_state *state, char *str);
 
 void	*patrol(void *ptr)
 {
-	auto t_state *state = (t_state *)ptr;
+	auto t_state * state = (t_state *)ptr;
 	while (1)
 	{
 		sem_wait(state->philo.sem);
